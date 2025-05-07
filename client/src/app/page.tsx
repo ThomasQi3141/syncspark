@@ -3,8 +3,10 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Navbar from "./__components/Navbar";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
@@ -25,27 +27,29 @@ export default function Home() {
           {/* Hero Section */}
           <section className="flex flex-col items-center justify-center text-center py-28 px-4 relative">
             <motion.h1
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 1.5 }}
               className="text-5xl md:text-7xl font-extrabold mb-6 bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-blue-400 bg-clip-text text-transparent drop-shadow-lg">
               Pair Programming, <br /> Real-Time. Effortless.
             </motion.h1>
             <motion.p
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 1.5, delay: 0.2 }}
               className="text-lg md:text-2xl text-gray-300 mb-10 max-w-2xl mx-auto">
               CodeSync lets you collaborate, code, and create
               together—instantly. Secure, fast, and beautifully simple.
             </motion.p>
             <motion.a
-              href="#get-started"
+              href="/new-room"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1.5, delay: 0.4 }}
               className="inline-block px-8 py-4 rounded-full font-bold text-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 shadow-xl hover:shadow-fuchsia-500/30 transition-all duration-700"
-              onClick={() => {}}>
+              onClick={() => {
+                router.push("/new-room");
+              }}>
               Get Started
             </motion.a>
             <div className="absolute left-0 top-0 w-full h-full pointer-events-none select-none opacity-30 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-fuchsia-500/20 via-transparent to-transparent" />
@@ -58,8 +62,8 @@ export default function Home() {
             {stats.map((stat, i) => (
               <motion.div
                 key={stat.title}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1.5, delay: 0.2 + i * 0.15 }}
                 className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 p-8 flex flex-col items-center shadow-lg hover:scale-105 transition-all duration-700">
@@ -77,8 +81,8 @@ export default function Home() {
           {/* Why Choose Section */}
           <section id="about" className="max-w-5xl mx-auto px-4 py-12">
             <motion.h2
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 1.5, delay: 0.2 }}
               className="text-3xl md:text-4xl font-bold text-center mb-10">
@@ -91,8 +95,8 @@ export default function Home() {
               {whyChoose.map((item, i) => (
                 <motion.div
                   key={item.title}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 1.5, delay: 0.2 + i * 0.15 }}
                   className="rounded-2xl bg-white/5 border border-white/10 p-6 shadow-md hover:bg-white/10 transition-all duration-700">
@@ -108,16 +112,16 @@ export default function Home() {
           {/* CTA Section */}
           <section id="get-started" className="py-16 px-4 text-center">
             <motion.h3
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 1.5, delay: 0.2 }}
               className="text-2xl md:text-3xl font-bold mb-4">
               Ready to Code Together?
             </motion.h3>
             <motion.p
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 1.5, delay: 0.4 }}
               className="text-gray-300 mb-8">
@@ -125,11 +129,14 @@ export default function Home() {
             </motion.p>
             <motion.a
               href="#"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 1.5, delay: 0.6 }}
-              className="inline-block px-8 py-4 rounded-full font-bold text-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 shadow-xl hover:shadow-fuchsia-500/30 transition-all duration-700">
+              className="inline-block px-8 py-4 rounded-full font-bold text-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 shadow-xl hover:shadow-fuchsia-500/30 transition-all duration-700"
+              onClick={() => {
+                router.push("/new-room");
+              }}>
               Start Coding Now
             </motion.a>
           </section>

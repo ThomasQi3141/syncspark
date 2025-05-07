@@ -1,0 +1,230 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import Editor from "@monaco-editor/react";
+
+const languages = [
+  { id: "javascript", name: "JavaScript" },
+  { id: "typescript", name: "TypeScript" },
+  { id: "python", name: "Python" },
+  { id: "java", name: "Java" },
+  { id: "csharp", name: "C#" },
+  { id: "cpp", name: "C++" },
+  { id: "go", name: "Go" },
+  { id: "rust", name: "Rust" },
+];
+
+const themes = [
+  { id: "vs-dark", name: "Dark" },
+  { id: "light", name: "Light" },
+  { id: "hc-black", name: "High Contrast" },
+];
+
+export default function RoomCode() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const roomCode = pathname.slice(1); // Remove the leading slash
+  const [code, setCode] = useState("// Start coding here...");
+  const [language, setLanguage] = useState("javascript");
+  const [theme, setTheme] = useState("vs-dark");
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [isThemeOpen, setIsThemeOpen] = useState(false);
+  const [roomStatus, setRoomStatus] = useState({
+    isPublic: false,
+    connectedUsers: 1,
+    maxUsers: 10,
+  });
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const handleEditorChange = (value: string | undefined) => {
+    if (value !== undefined) {
+      setCode(value);
+    }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setShowTooltip(true);
+    setTimeout(() => setShowTooltip(false), 2000);
+  };
+
+  return (
+    <>
+      <style jsx global>{`
+        body {
+          margin: 0;
+          padding: 0;
+          overflow-x: hidden;
+        }
+      `}</style>
+      <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-gradient-to-br from-[#18122B] via-[#22223B] to-[#0F1021] text-white">
+        <div className="absolute inset-0 overflow-y-auto">
+          <div className="flex flex-col h-screen">
+            {/* Room Header */}
+            <div className="px-8 py-4 border-b border-white/10 bg-white/5 backdrop-blur-md relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="relative group">
+                    <button
+                      onClick={handleCopyLink}
+                      className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors cursor-pointer">
+                      <span className="text-xl font-extrabold bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
+                        CodeSync.io
+                      </span>
+                      <span className="text-gray-400">/</span>
+                      <span className="text-gray-300">{roomCode}</span>
+                      <svg
+                        className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                        />
+                      </svg>
+                    </button>
+                    {/* Tooltip */}
+                    <div
+                      className={`absolute left-0 -bottom-8 px-2 py-1 text-xs bg-gray-800 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap ${
+                        showTooltip ? "opacity-100" : ""
+                      }`}>
+                      {showTooltip ? "Copied!" : "Click to copy link"}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        roomStatus.isPublic
+                          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                          : "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                      } border`}>
+                      {roomStatus.isPublic ? "Public" : "Private"}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {roomStatus.connectedUsers}/{roomStatus.maxUsers} users
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                  {/* Language Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => {
+                        setIsLanguageOpen(!isLanguageOpen);
+                        setIsThemeOpen(false);
+                      }}
+                      className="px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center space-x-2 cursor-pointer">
+                      <span>
+                        {languages.find((l) => l.id === language)?.name}
+                      </span>
+                      <svg
+                        className={`w-4 h-4 transition-transform ${
+                          isLanguageOpen ? "rotate-180" : ""
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+                    {isLanguageOpen && (
+                      <div className="absolute right-0 mt-2 w-48 rounded-lg bg-[#22223B] border border-white/10 shadow-xl z-[100]">
+                        {languages.map((lang) => (
+                          <button
+                            key={lang.id}
+                            onClick={() => {
+                              setLanguage(lang.id);
+                              setIsLanguageOpen(false);
+                            }}
+                            className={`w-full px-4 py-2 text-sm text-left hover:bg-white/10 transition-colors cursor-pointer ${
+                              language === lang.id ? "text-fuchsia-400" : ""
+                            }`}>
+                            {lang.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Theme Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => {
+                        setIsThemeOpen(!isThemeOpen);
+                        setIsLanguageOpen(false);
+                      }}
+                      className="px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center space-x-2 cursor-pointer">
+                      <span>{themes.find((t) => t.id === theme)?.name}</span>
+                      <svg
+                        className={`w-4 h-4 transition-transform ${
+                          isThemeOpen ? "rotate-180" : ""
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+                    {isThemeOpen && (
+                      <div className="absolute right-0 mt-2 w-48 rounded-lg bg-[#22223B] border border-white/10 shadow-xl z-[100]">
+                        {themes.map((t) => (
+                          <button
+                            key={t.id}
+                            onClick={() => {
+                              setTheme(t.id);
+                              setIsThemeOpen(false);
+                            }}
+                            className={`w-full px-4 py-2 text-sm text-left hover:bg-white/10 transition-colors cursor-pointer ${
+                              theme === t.id ? "text-fuchsia-400" : ""
+                            }`}>
+                            {t.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Editor Container */}
+            <div className="flex-1 relative z-0">
+              <Editor
+                height="100%"
+                defaultLanguage={language}
+                language={language}
+                theme={theme}
+                value={code}
+                onChange={handleEditorChange}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  wordWrap: "on",
+                  lineNumbers: "on",
+                  renderWhitespace: "selection",
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  padding: { top: 16, bottom: 16 },
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
