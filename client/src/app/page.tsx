@@ -1,103 +1,194 @@
-import Image from "next/image";
+"use client";
+
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import Navbar from "./__components/Navbar";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <>
+      <style jsx global>{`
+        body {
+          margin: 0;
+          padding: 0;
+          overflow-x: hidden;
+        }
+      `}</style>
+      <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-gradient-to-br from-[#18122B] via-[#22223B] to-[#0F1021] text-white">
+        <div className="absolute inset-0 overflow-y-auto">
+          <Navbar />
+
+          {/* Hero Section */}
+          <section className="flex flex-col items-center justify-center text-center py-28 px-4 relative">
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.5 }}
+              className="text-5xl md:text-7xl font-extrabold mb-6 bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-blue-400 bg-clip-text text-transparent drop-shadow-lg">
+              Pair Programming, <br /> Real-Time. Effortless.
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.5, delay: 0.2 }}
+              className="text-lg md:text-2xl text-gray-300 mb-10 max-w-2xl mx-auto">
+              CodeSync lets you collaborate, code, and create
+              together—instantly. Secure, fast, and beautifully simple.
+            </motion.p>
+            <motion.a
+              href="#get-started"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1.5, delay: 0.4 }}
+              className="inline-block px-8 py-4 rounded-full font-bold text-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 shadow-xl hover:shadow-fuchsia-500/30 transition-all duration-700"
+              onClick={() => {}}>
+              Get Started
+            </motion.a>
+            <div className="absolute left-0 top-0 w-full h-full pointer-events-none select-none opacity-30 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-fuchsia-500/20 via-transparent to-transparent" />
+          </section>
+
+          {/* Stats/Features Section */}
+          <section
+            id="features"
+            className="max-w-5xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.title}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.5, delay: 0.2 + i * 0.15 }}
+                className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 p-8 flex flex-col items-center shadow-lg hover:scale-105 transition-all duration-700">
+                <span className={`text-3xl font-bold mb-2 ${stat.color}`}>
+                  {stat.value}
+                </span>
+                <span className="text-lg font-semibold mb-1">{stat.title}</span>
+                <span className="text-gray-300 text-sm text-center">
+                  {stat.desc}
+                </span>
+              </motion.div>
+            ))}
+          </section>
+
+          {/* Why Choose Section */}
+          <section id="about" className="max-w-5xl mx-auto px-4 py-12">
+            <motion.h2
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.5, delay: 0.2 }}
+              className="text-3xl md:text-4xl font-bold text-center mb-10">
+              Why Choose{" "}
+              <span className="bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
+                CodeSync?
+              </span>
+            </motion.h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {whyChoose.map((item, i) => (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1.5, delay: 0.2 + i * 0.15 }}
+                  className="rounded-2xl bg-white/5 border border-white/10 p-6 shadow-md hover:bg-white/10 transition-all duration-700">
+                  <span className={`font-bold text-lg ${item.color}`}>
+                    {item.title}
+                  </span>
+                  <p className="text-gray-300 mt-2">{item.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+
+          {/* CTA Section */}
+          <section id="get-started" className="py-16 px-4 text-center">
+            <motion.h3
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.5, delay: 0.2 }}
+              className="text-2xl md:text-3xl font-bold mb-4">
+              Ready to Code Together?
+            </motion.h3>
+            <motion.p
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.5, delay: 0.4 }}
+              className="text-gray-300 mb-8">
+              Join developers collaborating in real-time with CodeSync.
+            </motion.p>
+            <motion.a
+              href="#"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.5, delay: 0.6 }}
+              className="inline-block px-8 py-4 rounded-full font-bold text-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 shadow-xl hover:shadow-fuchsia-500/30 transition-all duration-700">
+              Start Coding Now
+            </motion.a>
+          </section>
+
+          {/* Footer */}
+          <footer className="w-full border-t border-white/10 bg-white/5 backdrop-blur-md py-6 flex items-center justify-between px-8 text-sm text-gray-400">
+            <span>
+              &copy; {new Date().getFullYear()} CodeSync. All rights reserved.
+            </span>
+            <span className="bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent font-bold">
+              by Thomas Qi
+            </span>
+          </footer>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+    </>
   );
 }
+
+const stats = [
+  {
+    value: "100%",
+    title: "Live Sync",
+    desc: "Instant code updates across all collaborators.",
+    color: "text-fuchsia-400",
+  },
+  {
+    value: "24/7",
+    title: "Availability",
+    desc: "Collaborate anytime, anywhere.",
+    color: "text-cyan-400",
+  },
+  {
+    value: "Secure",
+    title: "End-to-End",
+    desc: "Encrypted sessions for your privacy.",
+    color: "text-pink-400",
+  },
+];
+
+const whyChoose = [
+  {
+    title: "Real-Time Collaboration",
+    desc: "See changes instantly as your team members code, with seamless cursor tracking and presence awareness.",
+    color: "text-fuchsia-400",
+  },
+  {
+    title: "Lightning Fast",
+    desc: "Built with WebSocket technology for minimal latency, ensuring your coding session stays in sync.",
+    color: "text-cyan-400",
+  },
+  {
+    title: "Developer Experience",
+    desc: "Syntax highlighting, auto-completion, and familiar IDE features make coding together feel natural.",
+    color: "text-pink-400",
+  },
+  {
+    title: "Easy to Use",
+    desc: "No complex setup required. Just share a link and start coding together instantly.",
+    color: "text-blue-400",
+  },
+];
