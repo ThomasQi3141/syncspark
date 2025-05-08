@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Editor from "@monaco-editor/react";
 import { useGetRoomQuery } from "@/store/slices/roomsSlice";
+import { getSocket } from "../../lib/socket";
 
 const languages = [
   { id: "javascript", name: "JavaScript" },
@@ -22,6 +23,10 @@ const themes = [
   { id: "hc-black", name: "High Contrast" },
 ];
 
+function generateGuestName() {
+  return `Guest ${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
 export default function RoomCode() {
   const pathname = usePathname();
   const router = useRouter();
@@ -33,6 +38,15 @@ export default function RoomCode() {
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [nickname, setNickname] = useState(generateGuestName());
+  const [showNameModal, setShowNameModal] = useState(true);
+
+  useEffect(() => {
+    if (!roomCode || showNameModal) return;
+    const socket = getSocket();
+    socket.connect();
+    socket.emit("join-room", { roomCode, nickname });
+  }, [roomCode, showNameModal, nickname]);
 
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
@@ -83,6 +97,60 @@ export default function RoomCode() {
 
   return (
     <>
+      {/* Name Modal */}
+      {showNameModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-gradient-to-br from-[#18122B] via-[#22223B] to-[#0F1021] rounded-2xl shadow-2xl p-8 min-w-[340px] flex flex-col items-center border border-white/10">
+            <label className="mb-3 text-white font-semibold text-xl tracking-wide">
+              Enter your nickname
+            </label>
+            <div className="flex w-full items-center">
+              <input
+                className="flex-1 px-4 py-2 rounded-l-lg bg-white/10 text-white border-none placeholder:text-gray-400 text-base font-medium focus:outline-none"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                maxLength={20}
+                autoFocus
+                placeholder="Your nickname"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && nickname.trim())
+                    setShowNameModal(false);
+                }}
+              />
+              <button
+                className="bg-gradient-to-r from-fuchsia-500 to-cyan-400 hover:from-fuchsia-600 hover:to-cyan-500 text-white px-3 py-2 rounded-r-lg font-bold transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                onClick={() => setNickname(generateGuestName())}
+                title="Randomize name"
+                type="button"
+                tabIndex={0}>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 4v5h.582M20 20v-5h-.581M5 9A7.003 7.003 0 0112 5c1.657 0 3.156.576 4.354 1.536M19 15a7.003 7.003 0 01-7 4c-1.657 0-3.156-.576-4.354-1.536"
+                  />
+                </svg>
+              </button>
+              <button
+                className="ml-3 px-5 py-2 rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white font-semibold shadow hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:opacity-50"
+                onClick={() => nickname.trim() && setShowNameModal(false)}
+                disabled={!nickname.trim()}
+                tabIndex={0}>
+                OK
+              </button>
+            </div>
+            <p className="mt-4 text-sm text-gray-400 text-center max-w-xs">
+              This name will be visible to others in the room. You can randomize
+              it or enter your own.
+            </p>
+          </div>
+        </div>
+      )}
       <style jsx global>{`
         body {
           margin: 0;
