@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Editor from "@monaco-editor/react";
+import { useGetRoomQuery } from "@/store/slices/roomsSlice";
 
 const languages = [
   { id: "javascript", name: "JavaScript" },
@@ -25,16 +26,12 @@ export default function RoomCode() {
   const pathname = usePathname();
   const router = useRouter();
   const roomCode = pathname.slice(1); // Remove the leading slash
+  const { data: room, isLoading, error } = useGetRoomQuery(roomCode);
   const [code, setCode] = useState("// Start coding here...");
   const [language, setLanguage] = useState("javascript");
   const [theme, setTheme] = useState("vs-dark");
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
-  const [roomStatus, setRoomStatus] = useState({
-    isPublic: false,
-    connectedUsers: 1,
-    maxUsers: 10,
-  });
   const [showTooltip, setShowTooltip] = useState(false);
 
   const handleEditorChange = (value: string | undefined) => {
@@ -48,6 +45,41 @@ export default function RoomCode() {
     setShowTooltip(true);
     setTimeout(() => setShowTooltip(false), 2000);
   };
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-gradient-to-br from-[#18122B] via-[#22223B] to-[#0F1021] text-white flex items-center justify-center">
+        <div className="text-xl font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
+          Loading room...
+        </div>
+      </div>
+    );
+  }
+
+  if (!room) {
+    return (
+      <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-gradient-to-br from-[#18122B] via-[#22223B] to-[#0F1021] text-white flex items-center justify-center">
+        <div className="text-center space-y-6">
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
+            404
+          </h1>
+          <p className="text-xl text-gray-300">
+            Room <span className="text-white font-medium">{roomCode}</span> not
+            found
+          </p>
+          <p className="text-gray-400 max-w-md mx-auto">
+            The room you're looking for doesn't exist or has been deleted.
+            Create a new room to start coding.
+          </p>
+          <button
+            onClick={() => router.push("/")}
+            className="px-6 py-3 rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white font-medium hover:opacity-90 transition-opacity cursor-pointer">
+            Go to Homepage
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -73,7 +105,7 @@ export default function RoomCode() {
                         CodeSync.io
                       </span>
                       <span className="text-gray-400">/</span>
-                      <span className="text-gray-300">{roomCode}</span>
+                      <span className="text-gray-300">{room.code}</span>
                       <svg
                         className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors"
                         fill="none"
@@ -98,15 +130,13 @@ export default function RoomCode() {
                   <div className="flex items-center space-x-3">
                     <span
                       className={`px-2 py-1 text-xs rounded-full ${
-                        roomStatus.isPublic
+                        room.isPublic
                           ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                           : "bg-amber-500/20 text-amber-400 border-amber-500/30"
                       } border`}>
-                      {roomStatus.isPublic ? "Public" : "Private"}
+                      {room.isPublic ? "Public" : "Private"}
                     </span>
-                    <span className="text-xs text-gray-400">
-                      {roomStatus.connectedUsers}/{roomStatus.maxUsers} users
-                    </span>
+                    <span className="text-sm text-gray-300">{room.name}</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
