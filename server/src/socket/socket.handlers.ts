@@ -34,6 +34,13 @@ export const setupSocketHandlers = (io: Server) => {
       socket.to(data.roomCode).emit("code-update", data.code);
     });
 
+    socket.on(
+      "language-change",
+      (data: { roomCode: string; language: string }) => {
+        socket.to(data.roomCode).emit("language-change", data.language);
+      }
+    );
+
     socket.on("cursor-move", (data: { roomCode: string; position: number }) => {
       socket.to(data.roomCode).emit("cursor-update", {
         userId: socket.id,

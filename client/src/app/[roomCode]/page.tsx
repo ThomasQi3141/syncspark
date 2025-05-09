@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Editor from "@monaco-editor/react";
 import { useGetRoomQuery } from "@/store/slices/roomsSlice";
@@ -40,17 +40,67 @@ export default function RoomCode() {
   const [showTooltip, setShowTooltip] = useState(false);
   const [nickname, setNickname] = useState(generateGuestName());
   const [showNameModal, setShowNameModal] = useState(true);
+  const [userList, setUserList] = useState<{ id: string; nickname: string }[]>(
+    []
+  );
+  const [showUserList, setShowUserList] = useState(false);
+  const userListModalRef = useRef<HTMLDivElement>(null);
+  const [isRemoteUpdate, setIsRemoteUpdate] = useState(false);
 
   useEffect(() => {
     if (!roomCode || showNameModal) return;
     const socket = getSocket();
     socket.connect();
     socket.emit("join-room", { roomCode, nickname });
+
+    // Listen for user-list updates
+    const handleUserList = (users: { id: string; nickname: string }[]) => {
+      setUserList(users);
+    };
+    socket.on("user-list", handleUserList);
+
+    // Listen for language-change
+    const handleLanguageChange = (newLanguage: string) => {
+      setLanguage(newLanguage);
+    };
+    socket.on("language-change", handleLanguageChange);
+
+    // Listen for code-update
+    const handleCodeUpdate = (newCode: string) => {
+      setIsRemoteUpdate(true);
+      setCode(newCode);
+    };
+    socket.on("code-update", handleCodeUpdate);
+
+    return () => {
+      socket.off("user-list", handleUserList);
+      socket.off("language-change", handleLanguageChange);
+      socket.off("code-update", handleCodeUpdate);
+    };
   }, [roomCode, showNameModal, nickname]);
+
+  // Close modal when clicking outside
+  useEffect(() => {
+    if (!showUserList) return;
+    function handleClick(e: MouseEvent) {
+      if (
+        userListModalRef.current &&
+        !userListModalRef.current.contains(e.target as Node)
+      ) {
+        setShowUserList(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showUserList]);
 
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
       setCode(value);
+      if (!isRemoteUpdate) {
+        getSocket().emit("code-change", { roomCode, code: value });
+      }
+      setIsRemoteUpdate(false);
     }
   };
 
@@ -151,6 +201,43 @@ export default function RoomCode() {
           </div>
         </div>
       )}
+      {/* User List Modal */}
+      {showUserList && (
+        <div className="fixed inset-0 z-[201] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div
+            ref={userListModalRef}
+            className="bg-gradient-to-br from-[#18122B] via-[#22223B] to-[#0F1021] rounded-2xl shadow-2xl p-8 min-w-[340px] max-w-full w-full sm:w-[400px] flex flex-col items-center border border-white/10 relative">
+            <button
+              className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl font-bold focus:outline-none"
+              onClick={() => setShowUserList(false)}
+              aria-label="Close user list">
+              ×
+            </button>
+            <h2 className="mb-4 text-white font-semibold text-2xl tracking-wide text-center">
+              Users in Room
+            </h2>
+            <ul className="w-full space-y-2">
+              {userList.length === 0 ? (
+                <li className="text-gray-400 text-center">No users</li>
+              ) : (
+                userList.map((user) => (
+                  <li
+                    key={user.id}
+                    className="px-4 py-2 rounded-lg bg-white/10 text-white font-medium flex items-center gap-2">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
+                    {user.nickname}
+                    {user.id === getSocket().id && (
+                      <span className="ml-2 text-xs text-fuchsia-400">
+                        (You)
+                      </span>
+                    )}
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
       <style jsx global>{`
         body {
           margin: 0;
@@ -205,6 +292,24 @@ export default function RoomCode() {
                       {room.isPublic ? "Public" : "Private"}
                     </span>
                     <span className="text-sm text-gray-300">{room.name}</span>
+                    <button
+                      className="ml-2 flex items-center gap-1 px-3 py-1 rounded bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white text-xs font-semibold shadow hover:opacity-90 transition-opacity focus:outline-none"
+                      onClick={() => setShowUserList(true)}
+                      title="Show users in room">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0z"
+                        />
+                      </svg>
+                      {userList.length}
+                    </button>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -241,6 +346,10 @@ export default function RoomCode() {
                             key={lang.id}
                             onClick={() => {
                               setLanguage(lang.id);
+                              getSocket().emit("language-change", {
+                                roomCode,
+                                language: lang.id,
+                              });
                               setIsLanguageOpen(false);
                             }}
                             className={`w-full px-4 py-2 text-sm text-left hover:bg-white/10 transition-colors cursor-pointer ${

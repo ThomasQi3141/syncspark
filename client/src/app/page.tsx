@@ -146,8 +146,15 @@ export default function Home() {
             <span>
               &copy; {new Date().getFullYear()} CodeSync. All rights reserved.
             </span>
-            <span className="bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent font-bold">
-              by Thomas Qi
+            <span className="flex items-center gap-1">
+              Built by
+              <a
+                href="https://www.thomasqi.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent ml-1 hover:opacity-80 transition-opacity">
+                Thomas Qi
+              </a>
             </span>
           </footer>
         </div>

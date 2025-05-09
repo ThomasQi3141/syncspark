@@ -12,6 +12,7 @@ export default function NewRoom() {
   const [roomName, setRoomName] = useState("");
   const [isPublic, setIsPublic] = useState(true);
   const [createRoom, { isLoading }] = useCreateRoomMutation();
+  const [joinCode, setJoinCode] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +26,13 @@ export default function NewRoom() {
       router.push(`/${result.code}`);
     } catch (error) {
       console.error("Failed to create room:", error);
+    }
+  };
+
+  const handleJoinRoom = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (joinCode.trim()) {
+      router.push(`/${joinCode.trim()}`);
     }
   };
 
@@ -117,6 +125,29 @@ export default function NewRoom() {
                 </button>
               </form>
             </motion.div>
+            {/* Subtle join room section */}
+            <div className="mt-8 flex flex-col items-center">
+              <span className="text-gray-400 text-sm mb-2">
+                Already have a room code?
+              </span>
+              <form
+                onSubmit={handleJoinRoom}
+                className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-4 py-2 shadow-sm">
+                <input
+                  type="text"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value)}
+                  placeholder="Enter room code"
+                  className="bg-transparent text-white placeholder:text-gray-400 px-2 py-1 outline-none"
+                  maxLength={12}
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-1 rounded bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white text-xs font-semibold shadow hover:opacity-90 transition-opacity focus:outline-none">
+                  Join
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
