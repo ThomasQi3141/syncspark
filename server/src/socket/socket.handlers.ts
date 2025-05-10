@@ -1,7 +1,33 @@
 import { Server, Socket } from "socket.io";
 
-// In-memory room user list: { [roomCode]: Array<{ id: string, nickname: string }> }
-const roomUsers: Record<string, Array<{ id: string; nickname: string }>> = {};
+// 20 distinct HEX colors
+const USER_COLORS = [
+  "#FF5733",
+  "#33FF57",
+  "#3357FF",
+  "#F39C12",
+  "#8E44AD",
+  "#16A085",
+  "#E67E22",
+  "#2ECC71",
+  "#E74C3C",
+  "#3498DB",
+  "#1ABC9C",
+  "#9B59B6",
+  "#34495E",
+  "#27AE60",
+  "#2980B9",
+  "#D35400",
+  "#C0392B",
+  "#7F8C8D",
+  "#F1C40F",
+  "#2C3E50",
+];
+
+export const roomUsers: Record<
+  string,
+  Array<{ id: string; nickname: string; color: string }>
+> = {};
 
 export const setupSocketHandlers = (io: Server) => {
   io.on("connection", (socket: Socket) => {
@@ -10,10 +36,24 @@ export const setupSocketHandlers = (io: Server) => {
     socket.on("join-room", (data: { roomCode: string; nickname: string }) => {
       const { roomCode, nickname } = data;
       socket.join(roomCode);
-      // Add user to room
+      // Limit to 20 users per room
       if (!roomUsers[roomCode]) roomUsers[roomCode] = [];
-      roomUsers[roomCode].push({ id: socket.id, nickname });
-      console.log(`Client ${socket.id} joined room ${roomCode} as ${nickname}`);
+      if (roomUsers[roomCode].length >= 20) {
+        socket.emit("room-full");
+        return;
+      }
+      // Assign a color not already taken in the room
+      const takenColors = roomUsers[roomCode].map((u) => u.color);
+      const availableColors = USER_COLORS.filter(
+        (c) => !takenColors.includes(c)
+      );
+      const color =
+        availableColors[0] ||
+        USER_COLORS[roomUsers[roomCode].length % USER_COLORS.length];
+      roomUsers[roomCode].push({ id: socket.id, nickname, color });
+      console.log(
+        `Client ${socket.id} joined room ${roomCode} as ${nickname} with color ${color}`
+      );
       // Broadcast updated user list
       io.to(roomCode).emit("user-list", roomUsers[roomCode]);
     });

@@ -8,6 +8,7 @@ export default function Navbar() {
   const router = useRouter();
   const showGetStarted = pathname !== "/new-room";
   const isInRoom = pathname.length === 5; // Room codes are 4 characters + leading slash
+  const isRoomsPage = pathname === "/rooms";
 
   if (isInRoom) return null;
 
@@ -19,21 +20,18 @@ export default function Navbar() {
         CodeSync.io
       </span>
       <div className="flex items-center gap-8">
-        <a
-          href="#about"
-          className="hover:text-fuchsia-400 transition-colors duration-700">
-          About
-        </a>
-        <a
-          href="#features"
-          className="hover:text-cyan-400 transition-colors duration-700">
-          Features
-        </a>
+        {!isRoomsPage && (
+          <button
+            onClick={() => router.push("/rooms")}
+            className="ml-4 px-5 py-2 rounded-full font-semibold bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white shadow-xl hover:shadow-fuchsia-500/30 transition-all duration-700 cursor-pointer">
+            Browse Rooms
+          </button>
+        )}
         {showGetStarted && (
           <button
             onClick={() => router.push("/new-room")}
             className="ml-4 px-5 py-2 rounded-full font-semibold bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white shadow-xl hover:shadow-fuchsia-500/30 transition-all duration-700 cursor-pointer">
-            Get Started
+            Create a Room
           </button>
         )}
       </div>

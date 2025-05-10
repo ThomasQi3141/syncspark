@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { roomUsers } from "../socket/socket.handlers";
 
 interface Room {
   id: string;
@@ -59,7 +60,12 @@ export class RoomService {
   }
 
   async getAllRooms(): Promise<Room[]> {
-    return Array.from(this.rooms.values()).filter((room) => room.isPublic);
+    return Array.from(this.rooms.values())
+      .filter((room) => room.isPublic)
+      .map((room) => ({
+        ...room,
+        users: (roomUsers[room.code] || []).map((u: { id: string }) => u.id),
+      }));
   }
 
   async joinRoom(code: string, userId: string): Promise<Room | null> {

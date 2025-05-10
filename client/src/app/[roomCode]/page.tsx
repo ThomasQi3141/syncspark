@@ -40,21 +40,26 @@ export default function RoomCode() {
   const [showTooltip, setShowTooltip] = useState(false);
   const [nickname, setNickname] = useState(generateGuestName());
   const [showNameModal, setShowNameModal] = useState(true);
-  const [userList, setUserList] = useState<{ id: string; nickname: string }[]>(
-    []
-  );
+  const [userList, setUserList] = useState<
+    { id: string; nickname: string; color: string }[]
+  >([]);
   const [showUserList, setShowUserList] = useState(false);
   const userListModalRef = useRef<HTMLDivElement>(null);
   const [isRemoteUpdate, setIsRemoteUpdate] = useState(false);
+  const [roomFull, setRoomFull] = useState(false);
 
   useEffect(() => {
+    // Connect to socket, setup listeners
+    // Runs only when stuff that matters change
     if (!roomCode || showNameModal) return;
     const socket = getSocket();
     socket.connect();
     socket.emit("join-room", { roomCode, nickname });
 
     // Listen for user-list updates
-    const handleUserList = (users: { id: string; nickname: string }[]) => {
+    const handleUserList = (
+      users: { id: string; nickname: string; color: string }[]
+    ) => {
       setUserList(users);
     };
     socket.on("user-list", handleUserList);
@@ -72,10 +77,17 @@ export default function RoomCode() {
     };
     socket.on("code-update", handleCodeUpdate);
 
+    // Listen for room-full
+    const handleRoomFull = () => {
+      setRoomFull(true);
+    };
+    socket.on("room-full", handleRoomFull);
+
     return () => {
       socket.off("user-list", handleUserList);
       socket.off("language-change", handleLanguageChange);
       socket.off("code-update", handleCodeUpdate);
+      socket.off("room-full", handleRoomFull);
     };
   }, [roomCode, showNameModal, nickname]);
 
@@ -134,6 +146,31 @@ export default function RoomCode() {
           <p className="text-gray-400 max-w-md mx-auto">
             The room you're looking for doesn't exist or has been deleted.
             Create a new room to start coding.
+          </p>
+          <button
+            onClick={() => router.push("/")}
+            className="px-6 py-3 rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white font-medium hover:opacity-90 transition-opacity cursor-pointer">
+            Go to Homepage
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (roomFull) {
+    return (
+      <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-gradient-to-br from-[#18122B] via-[#22223B] to-[#0F1021] text-white flex items-center justify-center">
+        <div className="text-center space-y-6">
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
+            Room Full
+          </h1>
+          <p className="text-xl text-gray-300">
+            Room <span className="text-white font-medium">{roomCode}</span> is
+            full
+          </p>
+          <p className="text-gray-400 max-w-md mx-auto">
+            This room has reached the maximum of 20 users. Please try joining
+            another room or create a new one.
           </p>
           <button
             onClick={() => router.push("/")}
@@ -224,7 +261,10 @@ export default function RoomCode() {
                   <li
                     key={user.id}
                     className="px-4 py-2 rounded-lg bg-white/10 text-white font-medium flex items-center gap-2">
-                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
+                    <span
+                      className="inline-block w-3 h-3 rounded-full"
+                      style={{ backgroundColor: user.color }}
+                    />
                     {user.nickname}
                     {user.id === getSocket().id && (
                       <span className="ml-2 text-xs text-fuchsia-400">
