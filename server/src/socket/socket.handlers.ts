@@ -122,7 +122,7 @@ export const setupSocketHandlers = (io: Server) => {
               delete roomUsers[room];
               await roomService.deleteRoom(room);
               console.log(`Room ${room} deleted after 1 minute of inactivity.`);
-            }, 10000);
+            }, 60000);
           }
         }
         socket.to(room).emit("user-left", { userId: socket.id });
