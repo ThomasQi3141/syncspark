@@ -86,7 +86,7 @@ export default function NewRoom() {
                     type="button"
                     onClick={() => setIsPublic(!isPublic)}
                     disabled={isLoading}
-                    className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20"
+                    className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20 cursor-pointer"
                     style={{
                       backgroundColor: isPublic ? "#8B5CF6" : "#374151",
                     }}>

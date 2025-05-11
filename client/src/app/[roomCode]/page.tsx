@@ -205,7 +205,7 @@ export default function RoomCode() {
                 }}
               />
               <button
-                className="bg-gradient-to-r from-fuchsia-500 to-cyan-400 hover:from-fuchsia-600 hover:to-cyan-500 text-white px-3 py-2 rounded-r-lg font-bold transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="bg-gradient-to-r from-fuchsia-500 to-cyan-400 hover:from-fuchsia-600 hover:to-cyan-500 text-white px-3 py-2 rounded-r-lg font-bold transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-cyan-400 cursor-pointer"
                 onClick={() => setNickname(generateGuestName())}
                 title="Randomize name"
                 type="button"
@@ -224,7 +224,7 @@ export default function RoomCode() {
                 </svg>
               </button>
               <button
-                className="ml-3 px-5 py-2 rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white font-semibold shadow hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:opacity-50"
+                className="ml-3 px-5 py-2 rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white font-semibold shadow hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:opacity-50 cursor-pointer"
                 onClick={() => nickname.trim() && setShowNameModal(false)}
                 disabled={!nickname.trim()}
                 tabIndex={0}>
@@ -245,7 +245,7 @@ export default function RoomCode() {
             ref={userListModalRef}
             className="bg-gradient-to-br from-[#18122B] via-[#22223B] to-[#0F1021] rounded-2xl shadow-2xl p-8 min-w-[340px] max-w-full w-full sm:w-[400px] flex flex-col items-center border border-white/10 relative">
             <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl font-bold focus:outline-none"
+              className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl font-bold focus:outline-none cursor-pointer"
               onClick={() => setShowUserList(false)}
               aria-label="Close user list">
               ×
@@ -328,12 +328,12 @@ export default function RoomCode() {
                         room.isPublic
                           ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                           : "bg-amber-500/20 text-amber-400 border-amber-500/30"
-                      } border`}>
+                      } border cursor-pointer`}>
                       {room.isPublic ? "Public" : "Private"}
                     </span>
                     <span className="text-sm text-gray-300">{room.name}</span>
                     <button
-                      className="ml-2 flex items-center gap-1 px-3 py-1 rounded bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white text-xs font-semibold shadow hover:opacity-90 transition-opacity focus:outline-none"
+                      className="ml-2 flex items-center gap-1 px-3 py-1 rounded bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white text-xs font-semibold shadow hover:opacity-90 transition-opacity focus:outline-none cursor-pointer"
                       onClick={() => setShowUserList(true)}
                       title="Show users in room">
                       <svg

@@ -31,7 +31,7 @@ export default function Navbar() {
           <button
             onClick={() => router.push("/new-room")}
             className="ml-4 px-5 py-2 rounded-full font-semibold bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white shadow-xl hover:shadow-fuchsia-500/30 transition-all duration-700 cursor-pointer">
-            Create a Room
+            Join a Room
           </button>
         )}
       </div>

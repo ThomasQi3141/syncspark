@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "../__components/Navbar";
 import { useGetRoomsQuery } from "@/store/slices/roomsSlice";
 import { useRouter, usePathname } from "next/navigation";
@@ -22,6 +22,14 @@ export default function RoomsPage() {
   const { data: rooms = [], isLoading, isError, refetch } = useGetRoomsQuery();
   const router = useRouter();
   const pathname = usePathname();
+  const [search, setSearch] = useState("");
+
+  // Filter rooms by name or code
+  const filteredRooms = rooms.filter(
+    (room) =>
+      room.name.toLowerCase().includes(search.toLowerCase()) ||
+      room.code.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-gradient-to-br from-[#18122B] via-[#22223B] to-[#0F1021] text-white">
@@ -32,11 +40,20 @@ export default function RoomsPage() {
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
               Public Rooms
             </h1>
-            <button
-              onClick={() => refetch()}
-              className="px-5 py-2 rounded-lg font-semibold bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white shadow hover:opacity-90 transition-opacity">
-              Refresh
-            </button>
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Filter rooms..."
+                className="px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/30 transition-all duration-200 w-full md:w-56"
+              />
+              <button
+                onClick={() => refetch()}
+                className="ml-2 px-5 py-2 rounded-full font-semibold bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white shadow-xl hover:shadow-fuchsia-500/30 transition-all duration-700 cursor-pointer">
+                Refresh
+              </button>
+            </div>
           </div>
           {isLoading ? (
             <div className="text-center text-lg text-gray-300 py-20">
@@ -46,13 +63,13 @@ export default function RoomsPage() {
             <div className="text-center text-lg text-red-400 py-20">
               Failed to load rooms.
             </div>
-          ) : rooms.length === 0 ? (
+          ) : filteredRooms.length === 0 ? (
             <div className="text-center text-lg text-gray-400 py-20">
               No public rooms found.
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-              {rooms.map((room, i) => (
+              {filteredRooms.map((room, i) => (
                 <button
                   key={room.code}
                   onClick={() => router.push(`/${room.code}`)}

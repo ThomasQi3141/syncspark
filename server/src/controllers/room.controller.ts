@@ -1,12 +1,8 @@
 import { Request, Response } from "express";
-import { RoomService } from "../services/room.service";
+import { roomServiceSingleton } from "../services/room.service";
 
 export class RoomController {
-  private roomService: RoomService;
-
-  constructor() {
-    this.roomService = new RoomService();
-  }
+  private roomService = roomServiceSingleton;
 
   createRoom = async (req: Request, res: Response) => {
     try {

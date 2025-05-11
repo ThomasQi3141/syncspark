@@ -81,4 +81,10 @@ export class RoomService {
 
     return room;
   }
+
+  async deleteRoom(code: string): Promise<void> {
+    this.rooms.delete(code);
+  }
 }
+
+export const roomServiceSingleton = new RoomService();
