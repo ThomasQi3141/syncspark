@@ -47,6 +47,18 @@ export default function RoomCode() {
   const userListModalRef = useRef<HTMLDivElement>(null);
   const [isRemoteUpdate, setIsRemoteUpdate] = useState(false);
   const [roomFull, setRoomFull] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<
+    {
+      nickname: string;
+      color: string;
+      message: string;
+      timestamp: number;
+    }[]
+  >([]);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const [unseenChatCount, setUnseenChatCount] = useState(0);
 
   useEffect(() => {
     // Connect to socket, setup listeners
@@ -120,6 +132,48 @@ export default function RoomCode() {
     navigator.clipboard.writeText(window.location.href);
     setShowTooltip(true);
     setTimeout(() => setShowTooltip(false), 2000);
+  };
+
+  // Chat socket logic
+  useEffect(() => {
+    if (!roomCode || showNameModal) return;
+    const socket = getSocket();
+    const handleChatMessage = (msg: {
+      nickname: string;
+      color: string;
+      message: string;
+      timestamp: number;
+    }) => {
+      setChatMessages((prev) => [...prev, msg]);
+      if (!showChat) setUnseenChatCount((c) => c + 1);
+    };
+    socket.on("chat-message", handleChatMessage);
+    return () => {
+      socket.off("chat-message", handleChatMessage);
+    };
+  }, [roomCode, showNameModal, showChat]);
+
+  // Reset unseen count when chat is opened
+  useEffect(() => {
+    if (showChat) setUnseenChatCount(0);
+  }, [showChat]);
+
+  useEffect(() => {
+    if (showChat && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages, showChat]);
+
+  const sendChat = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!chatInput.trim()) return;
+    getSocket().emit("chat-message", {
+      roomCode,
+      nickname,
+      color: userList.find((u) => u.id === getSocket().id)?.color || "#fff",
+      message: chatInput.trim(),
+    });
+    setChatInput("");
   };
 
   if (isLoading) {
@@ -278,6 +332,70 @@ export default function RoomCode() {
           </div>
         </div>
       )}
+      {/* Chatroom Sidebar */}
+      {showChat && (
+        <div className="fixed top-0 right-0 h-full w-full sm:w-[350px] z-[300] flex flex-col bg-gradient-to-br from-[#18122B] via-[#22223B] to-[#0F1021] border-l border-white/10 shadow-2xl animate-fade-in">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5">
+            <span className="font-bold text-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
+              Room Chat
+            </span>
+            <button
+              className="text-2xl text-gray-400 hover:text-white transition-colors cursor-pointer"
+              onClick={() => setShowChat(false)}
+              aria-label="Close chat">
+              ×
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2">
+            {chatMessages.length === 0 ? (
+              <div className="text-gray-400 text-center mt-8">
+                No messages yet.
+              </div>
+            ) : (
+              chatMessages.map((msg, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <span
+                    className="w-2 h-2 mt-2 rounded-full"
+                    style={{ backgroundColor: msg.color }}
+                  />
+                  <div>
+                    <span
+                      className="font-semibold text-sm"
+                      style={{ color: msg.color }}>
+                      {msg.nickname}
+                    </span>
+                    <span className="ml-2 text-xs text-gray-500">
+                      {new Date(msg.timestamp).toLocaleTimeString()}
+                    </span>
+                    <div className="text-gray-200 text-sm break-words max-w-[250px]">
+                      {msg.message}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={chatEndRef} />
+          </div>
+          <form
+            onSubmit={sendChat}
+            className="p-4 border-t border-white/10 bg-white/5 flex gap-2">
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              placeholder="Type a message..."
+              className="flex-1 px-3 py-2 rounded-lg bg-white/10 text-white border-none placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/30 text-sm"
+              maxLength={200}
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white font-semibold shadow hover:opacity-90 transition-opacity cursor-pointer"
+              disabled={!chatInput.trim()}>
+              Send
+            </button>
+          </form>
+        </div>
+      )}
       <style jsx global>{`
         body {
           margin: 0;
@@ -353,6 +471,31 @@ export default function RoomCode() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
+                  {/* Chat Icon */}
+                  <button
+                    className="flex items-center justify-center p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer relative"
+                    title="Chat"
+                    type="button"
+                    onClick={() => setShowChat(true)}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-6 h-6 text-cyan-300">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M21.75 6.75v6a2.25 2.25 0 01-2.25 2.25H6.25L2.75 20.25V6.75A2.25 2.25 0 015 4.5h14.5a2.25 2.25 0 012.25 2.25z"
+                      />
+                    </svg>
+                    {unseenChatCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold border-2 border-white shadow-md">
+                        {unseenChatCount > 99 ? "99+" : unseenChatCount}
+                      </span>
+                    )}
+                  </button>
                   {/* Language Dropdown */}
                   <div className="relative">
                     <button

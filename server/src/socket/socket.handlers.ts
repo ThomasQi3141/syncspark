@@ -109,6 +109,24 @@ export const setupSocketHandlers = (io: Server) => {
       });
     });
 
+    // Chat functionality
+    socket.on(
+      "chat-message",
+      (data: {
+        roomCode: string;
+        nickname: string;
+        color: string;
+        message: string;
+      }) => {
+        io.to(data.roomCode).emit("chat-message", {
+          nickname: data.nickname,
+          color: data.color,
+          message: data.message,
+          timestamp: Date.now(),
+        });
+      }
+    );
+
     socket.on("disconnecting", () => {
       for (const room of socket.rooms) {
         if (room === socket.id) continue;
