@@ -2,8 +2,6 @@
 
 A modern, real-time collaborative code editor and chat platform. Instantly create or join coding rooms, collaborate with others, and chat—all in a beautiful, responsive UI.
 
-![CodeSync Screenshot](./screenshot.png)
-
 ---
 
 ## 🚀 Features
