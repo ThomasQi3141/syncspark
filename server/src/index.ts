@@ -15,7 +15,7 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: process.env.NEXT_PUBLIC_CLIENT_URL || "http://localhost:3000",
     methods: ["GET", "POST"],
   },
 });
@@ -23,7 +23,7 @@ const io = new Server(httpServer, {
 // Middleware
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: process.env.NEXT_PUBLIC_CLIENT_URL || "http://localhost:3000",
     methods: ["GET", "POST"],
     credentials: true,
   })
