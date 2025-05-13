@@ -21,7 +21,7 @@ interface JoinRoomRequest {
 export const roomsApi = createApi({
   reducerPath: "roomsApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3001/api",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL,
     credentials: "include",
   }),
   tagTypes: ["Room"],
