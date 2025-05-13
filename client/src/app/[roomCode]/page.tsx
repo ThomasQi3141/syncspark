@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Editor from "@monaco-editor/react";
 import { useGetRoomQuery } from "@/store/slices/roomsSlice";
 import { getSocket } from "../../lib/socket";
+import TerminalOutput from "../__components/TerminalOutput";
 
 const languages = [
   { id: "javascript", name: "JavaScript" },
@@ -59,6 +60,10 @@ export default function RoomCode() {
   >([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [unseenChatCount, setUnseenChatCount] = useState(0);
+  const [output, setOutput] = useState("");
+  const [outputLoading, setOutputLoading] = useState(false);
+  const [outputError, setOutputError] = useState<string | undefined>(undefined);
+  const [showOutput, setShowOutput] = useState(false);
 
   useEffect(() => {
     // Connect to socket, setup listeners
@@ -95,11 +100,21 @@ export default function RoomCode() {
     };
     socket.on("room-full", handleRoomFull);
 
+    // Listen for run-result
+    const handleRunResult = (result: { output: string; error?: string }) => {
+      setOutput(result.output);
+      setOutputError(result.error);
+      setOutputLoading(false);
+      setShowOutput(true);
+    };
+    socket.on("run-result", handleRunResult);
+
     return () => {
       socket.off("user-list", handleUserList);
       socket.off("language-change", handleLanguageChange);
       socket.off("code-update", handleCodeUpdate);
       socket.off("room-full", handleRoomFull);
+      socket.off("run-result", handleRunResult);
     };
   }, [roomCode, showNameModal, nickname]);
 
@@ -175,6 +190,124 @@ export default function RoomCode() {
     });
     setChatInput("");
   };
+
+  const handleRunCode = async () => {
+    setOutputLoading(true);
+    setOutput("");
+    setOutputError(undefined);
+    setShowOutput(true);
+
+    try {
+      // Create submission
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_JUDGE0_URL}/submissions?base64_encoded=false&wait=false`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            source_code: code,
+            language_id: getJudge0LanguageId(language),
+            stdin: "",
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to create submission");
+      }
+
+      const { token } = await response.json();
+      if (!token) {
+        throw new Error("No submission token received");
+      }
+
+      // Poll for results
+      let resultData;
+      while (true) {
+        const resultRes = await fetch(
+          `${process.env.NEXT_PUBLIC_JUDGE0_URL}/submissions/${token}?base64_encoded=false`
+        );
+
+        if (!resultRes.ok) {
+          throw new Error("Failed to fetch submission status");
+        }
+
+        resultData = await resultRes.json();
+        const statusId = resultData.status?.id;
+
+        if (statusId === 1 || statusId === 2) {
+          // Still in queue or processing
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          continue;
+        }
+        break;
+      }
+
+      // Handle final status
+      const finalStatus = resultData.status?.id;
+      let output = "";
+      let error = undefined;
+
+      switch (finalStatus) {
+        case 3: // Accepted
+          output = resultData.stdout || "";
+          break;
+        case 4: // Wrong Answer
+          error = "Wrong Answer: output did not match expected output";
+          break;
+        case 5: // Time Limit Exceeded
+          error = "Time Limit Exceeded";
+          break;
+        case 6: // Compilation Error
+          error = resultData.compile_output || "Compilation Error";
+          break;
+        case 13: // Internal Error
+          error = "Internal Error. Please try again later";
+          break;
+        default:
+          output = resultData.stdout || "";
+          error = resultData.stderr || resultData.message || "Execution failed";
+      }
+
+      setOutput(output);
+      setOutputError(error);
+      setOutputLoading(false);
+
+      // Broadcast to room
+      getSocket().emit("run-result", { roomCode, output, error });
+    } catch (err: any) {
+      setOutputError(`Error: ${err.message}`);
+      setOutputLoading(false);
+      getSocket().emit("run-result", {
+        roomCode,
+        output: "",
+        error: `Error: ${err.message}`,
+      });
+    }
+  };
+
+  function getJudge0LanguageId(lang: string) {
+    switch (lang) {
+      case "javascript":
+        return 63;
+      case "typescript":
+        return 74;
+      case "python":
+        return 71;
+      case "java":
+        return 62;
+      case "csharp":
+        return 51;
+      case "cpp":
+        return 54;
+      case "go":
+        return 60;
+      case "rust":
+        return 73;
+      default:
+        return 63;
+    }
+  }
 
   if (isLoading) {
     return (
@@ -396,6 +529,35 @@ export default function RoomCode() {
           </form>
         </div>
       )}
+      {/* Terminal Output at bottom */}
+      {showOutput && (
+        <div className="fixed left-0 right-0 bottom-0 z-40 px-8 pb-4">
+          <div className="max-w-5xl mx-auto relative">
+            <button
+              onClick={() => setShowOutput(false)}
+              className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors cursor-pointer"
+              title="Close terminal">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <TerminalOutput
+              output={output}
+              loading={outputLoading}
+              error={outputError}
+            />
+          </div>
+        </div>
+      )}
       <style jsx global>{`
         body {
           margin: 0;
@@ -587,6 +749,53 @@ export default function RoomCode() {
                       </div>
                     )}
                   </div>
+                  {/* Run Code Button */}
+                  <button
+                    onClick={handleRunCode}
+                    className="ml-2 px-4 py-2 rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white font-semibold shadow hover:opacity-90 transition-opacity focus:outline-none cursor-pointer flex items-center gap-2"
+                    disabled={outputLoading}
+                    title="Run code in terminal">
+                    {outputLoading ? (
+                      <svg
+                        className="w-5 h-5 animate-spin"
+                        fill="none"
+                        viewBox="0 0 24 24">
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v8z"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 17v-2a4 4 0 014-4h8"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 7h8m0 0v8m0-8l-8 8"
+                        />
+                      </svg>
+                    )}
+                    <span>Run Code</span>
+                  </button>
                 </div>
               </div>
             </div>
