@@ -38,7 +38,7 @@ export default function Home() {
               animate={{ opacity: 1 }}
               transition={{ duration: 1.5, delay: 0.2 }}
               className="text-lg md:text-2xl text-gray-300 mb-10 max-w-2xl mx-auto">
-              CodeSync lets you collaborate, code, and create
+              SyncSpark lets you collaborate, code, and create
               together—instantly. Secure, fast, and beautifully simple.
             </motion.p>
             <motion.a
@@ -88,7 +88,7 @@ export default function Home() {
               className="text-3xl md:text-4xl font-bold text-center mb-10">
               Why Choose{" "}
               <span className="bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
-                CodeSync?
+                SyncSpark?
               </span>
             </motion.h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

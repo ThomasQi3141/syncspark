@@ -577,7 +577,7 @@ export default function RoomCode() {
                       onClick={handleCopyLink}
                       className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors cursor-pointer">
                       <span className="text-xl font-extrabold bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
-                        CodeSync.io
+                        SyncSpark.net
                       </span>
                       <span className="text-gray-400">/</span>
                       <span className="text-gray-300">{room.code}</span>

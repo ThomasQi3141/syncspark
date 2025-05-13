@@ -4,10 +4,10 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "CodeSync API Documentation",
+      title: "SyncSpark API Documentation",
       version: "1.0.0",
       description:
-        "API documentation for CodeSync real-time collaboration platform",
+        "API documentation for SyncSpark real-time collaboration platform",
     },
     servers: [
       {

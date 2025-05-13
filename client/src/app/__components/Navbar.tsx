@@ -17,7 +17,7 @@ export default function Navbar() {
       <span
         onClick={() => router.push("/")}
         className="text-2xl font-extrabold bg-gradient-to-r from-fuchsia-500 to-cyan-400 bg-clip-text text-transparent tracking-tight select-none hover:opacity-80 transition-opacity cursor-pointer">
-        CodeSync.io
+        SyncSpark.net
       </span>
       <div className="flex items-center gap-8">
         {!isRoomsPage && (

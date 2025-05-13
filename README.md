@@ -37,47 +37,6 @@ A modern, real-time collaborative code editor and chat platform. Instantly creat
 
 ---
 
-## 🖥️ Getting Started
-
-### Prerequisites
-
-- Node.js (v18+ recommended)
-- npm or yarn
-
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/yourusername/codesync.git
-cd codesync
-```
-
-### 2. Install dependencies
-
-```bash
-cd client && npm install
-cd ../server && npm install
-```
-
-### 3. Start the backend
-
-```bash
-cd server
-npm run dev
-```
-
-### 4. Start the frontend
-
-```bash
-cd ../client
-npm run dev
-```
-
-- Frontend: [http://localhost:3000](http://localhost:3000)
-- Backend: [http://localhost:3001](http://localhost:3001)
-- API Docs: [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
-
----
-
 ## ✨ Usage
 
 - **Create a room:** Click "Create a Room" and set a name and privacy.
