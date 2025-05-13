@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   title: "SyncSpark - Real-time Collaborative Coding",
   description:
     "Code together in real-time with your team. A modern pair programming tool for developers.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+  },
 };
 
 export default function RootLayout({

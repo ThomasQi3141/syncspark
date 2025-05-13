@@ -45,10 +45,17 @@ app.get("/health", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
+const HOST = "0.0.0.0";
 
-httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(
-    `API Documentation available at http://localhost:${PORT}/api-docs`
-  );
-});
+httpServer.listen(
+  {
+    port: PORT,
+    host: HOST,
+  },
+  () => {
+    console.log(`Server running on ${HOST}:${PORT}`);
+    console.log(
+      `API Documentation available at http://${HOST}:${PORT}/api-docs`
+    );
+  }
+);
