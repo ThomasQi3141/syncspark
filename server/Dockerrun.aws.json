@@ -1,0 +1,13 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "992382755441.dkr.ecr.us-east-1.amazonaws.com/syncspark:latest",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 3001,
+      "HostPort": 80
+    }
+  ]
+}
