@@ -65,8 +65,18 @@ export default function RoomCode() {
   const [outputError, setOutputError] = useState<string | undefined>(undefined);
   const [showOutput, setShowOutput] = useState(false);
 
+  // Add debug logging
+  useEffect(() => {
+    console.log("Room data:", room);
+  }, [room]);
+
   useEffect(() => {
     if (room) {
+      console.log("Setting room data:", {
+        content: room.content,
+        language: room.language,
+        theme: room.theme,
+      });
       setCode(room.content || "");
       setLanguage(room.language || "javascript");
       setTheme(room.theme || "vs-dark");

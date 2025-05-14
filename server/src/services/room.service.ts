@@ -62,7 +62,8 @@ export class RoomService {
   }
 
   async getRoom(code: string): Promise<Room | null> {
-    return this.rooms.get(code) || null;
+    const room = this.rooms.get(code) || null;
+    return room;
   }
 
   async getAllRooms(): Promise<Room[]> {
@@ -86,6 +87,10 @@ export class RoomService {
     }
 
     return room;
+  }
+
+  async updateRoom(code: string, updatedRoom: Room): Promise<void> {
+    this.rooms.set(code, updatedRoom);
   }
 
   async deleteRoom(code: string): Promise<void> {

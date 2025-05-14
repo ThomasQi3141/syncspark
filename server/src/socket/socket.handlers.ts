@@ -91,9 +91,17 @@ export const setupSocketHandlers = (io: Server) => {
       console.log(`Client ${socket.id} left room ${roomCode}`);
     });
 
-    socket.on("code-change", (data: { roomCode: string; code: string }) => {
-      socket.to(data.roomCode).emit("code-update", data.code);
-    });
+    socket.on(
+      "code-change",
+      async (data: { roomCode: string; code: string }) => {
+        const room = await roomService.getRoom(data.roomCode);
+        if (room) {
+          room.content = data.code;
+          await roomService.updateRoom(data.roomCode, room);
+        }
+        socket.to(data.roomCode).emit("code-update", data.code);
+      }
+    );
 
     socket.on(
       "language-change",
