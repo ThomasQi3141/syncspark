@@ -33,9 +33,9 @@ export default function RoomCode() {
   const router = useRouter();
   const roomCode = pathname.slice(1); // Remove the leading slash
   const { data: room, isLoading, error } = useGetRoomQuery(roomCode);
-  const [code, setCode] = useState("// Start coding here...");
-  const [language, setLanguage] = useState("javascript");
-  const [theme, setTheme] = useState("vs-dark");
+  const [code, setCode] = useState(room?.content || "");
+  const [language, setLanguage] = useState(room?.language || "javascript");
+  const [theme, setTheme] = useState(room?.theme || "vs-dark");
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -64,6 +64,14 @@ export default function RoomCode() {
   const [outputLoading, setOutputLoading] = useState(false);
   const [outputError, setOutputError] = useState<string | undefined>(undefined);
   const [showOutput, setShowOutput] = useState(false);
+
+  useEffect(() => {
+    if (room) {
+      setCode(room.content || "");
+      setLanguage(room.language || "javascript");
+      setTheme(room.theme || "vs-dark");
+    }
+  }, [room]);
 
   useEffect(() => {
     // Connect to socket, setup listeners

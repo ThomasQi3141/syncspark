@@ -8,6 +8,9 @@ interface Room {
   isPublic: boolean;
   createdAt: Date;
   users: string[];
+  language: string;
+  theme: string;
+  content: string;
 }
 
 export class RoomService {
@@ -49,6 +52,9 @@ export class RoomService {
       isPublic,
       createdAt: new Date(),
       users: [],
+      language: "javascript",
+      theme: "vs-dark",
+      content: "",
     };
 
     this.rooms.set(code, room);

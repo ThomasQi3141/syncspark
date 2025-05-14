@@ -7,6 +7,9 @@ interface Room {
   isPublic: boolean;
   createdAt: string;
   users: string[];
+  language: string;
+  theme: string;
+  content: string;
 }
 
 interface CreateRoomRequest {
