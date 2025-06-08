@@ -4,6 +4,8 @@ A modern, real-time collaborative code editor and chat platform. Instantly creat
 
 ---
 
+## NOTE: Cloud deployment currently paused due to high fees
+
 ## 🚀 Features
 
 - **Real-time collaborative code editing** (Monaco Editor, Socket.IO)
