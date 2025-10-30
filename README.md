@@ -64,8 +64,3 @@ Contributions are welcome! To get started:
 
 MIT
 
----
-
-## 👤 Author
-
-Built with ❤️ by [Thomas Qi](https://github.com/ThomasQi3141)
