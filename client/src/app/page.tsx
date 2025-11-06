@@ -125,7 +125,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 1.5, delay: 0.4 }}
               className="text-gray-300 mb-8">
-              Join developers collaborating in real-time with CodeSync.
+              Join developers collaborating in real-time with SyncSpark.
             </motion.p>
             <motion.a
               href="#"
@@ -144,7 +144,7 @@ export default function Home() {
           {/* Footer */}
           <footer className="w-full border-t border-white/10 bg-white/5 backdrop-blur-md py-6 flex items-center justify-between px-8 text-sm text-gray-400">
             <span>
-              &copy; {new Date().getFullYear()} CodeSync. All rights reserved.
+              &copy; {new Date().getFullYear()} SyncSpark. All rights reserved.
             </span>
             <span className="flex items-center gap-1">
               Built by
